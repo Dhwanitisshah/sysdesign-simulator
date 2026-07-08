@@ -6,7 +6,6 @@ Built to make system-design trade-offs visible: watch a database saturate as tra
 
 ![Latency vs. load — the M/M/1 hockey stick](docs/latency-chart.png)
 
-> _Add your screenshot at `docs/latency-chart.png`. The load-sweep chart above is the centerpiece: latency stays flat, then explodes as arrival rate approaches the bottleneck's service rate._
 
 ---
 
