@@ -12,6 +12,7 @@ import 'reactflow/dist/style.css'
 import './App.css'
 
 import Palette from './components/Palette'
+import PresetsPanel from './components/PresetsPanel'
 import ParamsPanel from './components/ParamsPanel'
 import InfraNode from './components/InfraNode'
 import SystemResultsPanel from './components/SystemResultsPanel'
@@ -177,11 +178,19 @@ function AppInner() {
     setSelectedNodeId(null)
   }, [])
 
+  const onLoadPreset = useCallback(
+    (preset) => onLoadDesign(preset.graph),
+    [onLoadDesign],
+  )
+
   const selectedNode = nodes.find((node) => node.id === selectedNodeId) ?? null
 
   return (
     <div className="app-layout">
-      <Palette onAddNode={onAddNodeFromPalette} />
+      <div className="palette-stack">
+        <Palette onAddNode={onAddNodeFromPalette} />
+        <PresetsPanel onLoadPreset={onLoadPreset} />
+      </div>
 
       <div className="canvas-wrapper" ref={wrapperRef}>
         <CritiquePanel nodes={nodes} edges={edges} />
