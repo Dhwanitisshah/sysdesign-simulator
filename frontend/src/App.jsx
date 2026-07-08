@@ -17,8 +17,9 @@ import InfraNode from './components/InfraNode'
 import SystemResultsPanel from './components/SystemResultsPanel'
 import LatencyChart from './components/LatencyChart'
 import CritiquePanel from './components/CritiquePanel'
+import SaveLoadPanel from './components/SaveLoadPanel'
 import { NODE_TYPES } from './nodeTypes'
-import { simulateGraph } from './api'
+import { fromGraph, simulateGraph } from './api'
 import { SimulationResultsContext } from './SimulationContext'
 
 const SIMULATE_DEBOUNCE_MS = 400
@@ -162,6 +163,13 @@ function AppInner() {
     )
   }, [])
 
+  const onLoadDesign = useCallback((graph) => {
+    const { nodes: loadedNodes, edges: loadedEdges } = fromGraph(graph)
+    setNodes(loadedNodes)
+    setEdges(loadedEdges)
+    setSelectedNodeId(null)
+  }, [])
+
   const selectedNode = nodes.find((node) => node.id === selectedNodeId) ?? null
 
   return (
@@ -170,7 +178,10 @@ function AppInner() {
 
       <div className="canvas-wrapper" ref={wrapperRef}>
         <CritiquePanel nodes={nodes} edges={edges} />
-        <SystemResultsPanel system={simResults.system} nodes={nodes} />
+        <div className="top-right-stack">
+          <SaveLoadPanel nodes={nodes} edges={edges} onLoadDesign={onLoadDesign} />
+          <SystemResultsPanel system={simResults.system} nodes={nodes} />
+        </div>
         {simError && <div className="sim-error-banner">{simError}</div>}
         <SimulationResultsContext.Provider value={simResults}>
           <ReactFlow

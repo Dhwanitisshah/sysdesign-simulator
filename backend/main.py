@@ -1,8 +1,11 @@
 import math
+from datetime import datetime, timezone
 from typing import Any
 
+from bson import ObjectId
+from bson.errors import InvalidId
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
@@ -11,6 +14,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from critique import get_critique
+from db import MongoNotConfiguredError, get_designs_collection
 from engine.simulator import Graph, GraphCycleError, GraphValidationError, simulate
 
 load_dotenv()
@@ -178,3 +182,61 @@ def critique_endpoint(request: Request, graph: Graph) -> dict[str, Any]:
         )
 
     return {"critique": text}
+
+
+@app.exception_handler(MongoNotConfiguredError)
+def _mongo_not_configured_handler(request: Request, exc: MongoNotConfiguredError) -> JSONResponse:
+    return JSONResponse(status_code=503, content={"detail": str(exc)})
+
+
+class SaveDesignRequest(BaseModel):
+    name: str
+    graph: Graph
+
+
+def _object_id_or_404(design_id: str) -> ObjectId:
+    try:
+        return ObjectId(design_id)
+    except InvalidId:
+        raise HTTPException(status_code=404, detail="Design not found.")
+
+
+@app.post("/designs")
+async def save_design(req: SaveDesignRequest) -> dict[str, Any]:
+    doc = {
+        "name": req.name,
+        "graph": req.graph.model_dump(),
+        "created_at": datetime.now(timezone.utc),
+    }
+    result = await get_designs_collection().insert_one(doc)
+    return {"id": str(result.inserted_id), "created_at": doc["created_at"]}
+
+
+@app.get("/designs")
+async def list_designs() -> list[dict[str, Any]]:
+    cursor = get_designs_collection().find({}, {"name": 1, "created_at": 1})
+    return [
+        {"id": str(doc["_id"]), "name": doc["name"], "created_at": doc["created_at"]}
+        async for doc in cursor
+    ]
+
+
+@app.get("/designs/{design_id}")
+async def get_design(design_id: str) -> dict[str, Any]:
+    doc = await get_designs_collection().find_one({"_id": _object_id_or_404(design_id)})
+    if doc is None:
+        raise HTTPException(status_code=404, detail="Design not found.")
+    return {
+        "id": str(doc["_id"]),
+        "name": doc["name"],
+        "created_at": doc["created_at"],
+        "graph": doc["graph"],
+    }
+
+
+@app.delete("/designs/{design_id}")
+async def delete_design(design_id: str) -> dict[str, Any]:
+    result = await get_designs_collection().delete_one({"_id": _object_id_or_404(design_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Design not found.")
+    return {"deleted": True}
