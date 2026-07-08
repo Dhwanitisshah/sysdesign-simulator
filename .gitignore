@@ -13,3 +13,7 @@ frontend/dist/
 
 # OS
 .DS_Store
+
+*.log
+.claude/
+/requirements.txt
