@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import ReactFlow, {
   addEdge,
   applyEdgeChanges,
@@ -15,6 +15,10 @@ import Palette from './components/Palette'
 import ParamsPanel from './components/ParamsPanel'
 import InfraNode from './components/InfraNode'
 import { NODE_TYPES } from './nodeTypes'
+import { simulateGraph } from './api'
+import { SimulationResultsContext } from './SimulationContext'
+
+const SIMULATE_DEBOUNCE_MS = 400
 
 const nodeTypes = { infra: InfraNode }
 
@@ -40,7 +44,35 @@ function AppInner() {
   const [edges, setEdges] = useState([])
   const [selectedNodeId, setSelectedNodeId] = useState(null)
   const [reactFlowInstance, setReactFlowInstance] = useState(null)
+  const [simResults, setSimResults] = useState({})
+  const [simError, setSimError] = useState(null)
   const wrapperRef = useRef(null)
+
+  useEffect(() => {
+    if (nodes.length === 0) {
+      setSimResults({})
+      setSimError(null)
+      return
+    }
+
+    let cancelled = false
+    const timeout = setTimeout(async () => {
+      const { data, error } = await simulateGraph(nodes, edges)
+      if (cancelled) return
+      if (error) {
+        setSimError(error)
+        setSimResults({})
+      } else {
+        setSimError(null)
+        setSimResults(data.nodes)
+      }
+    }, SIMULATE_DEBOUNCE_MS)
+
+    return () => {
+      cancelled = true
+      clearTimeout(timeout)
+    }
+  }, [nodes, edges])
 
   const onNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -134,25 +166,28 @@ function AppInner() {
       <Palette onAddNode={onAddNodeFromPalette} />
 
       <div className="canvas-wrapper" ref={wrapperRef}>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          nodeTypes={nodeTypes}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onNodesDelete={onNodesDelete}
-          onNodeClick={onNodeClick}
-          onPaneClick={onPaneClick}
-          onInit={setReactFlowInstance}
-          onDragOver={onDragOver}
-          onDrop={onDrop}
-          deleteKeyCode={['Backspace', 'Delete']}
-          fitView
-        >
-          <Background />
-          <Controls />
-        </ReactFlow>
+        {simError && <div className="sim-error-banner">{simError}</div>}
+        <SimulationResultsContext.Provider value={simResults}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            nodeTypes={nodeTypes}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodesDelete={onNodesDelete}
+            onNodeClick={onNodeClick}
+            onPaneClick={onPaneClick}
+            onInit={setReactFlowInstance}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            deleteKeyCode={['Backspace', 'Delete']}
+            fitView
+          >
+            <Background />
+            <Controls />
+          </ReactFlow>
+        </SimulationResultsContext.Provider>
       </div>
 
       <ParamsPanel node={selectedNode} onLabelChange={onLabelChange} onParamChange={onParamChange} />

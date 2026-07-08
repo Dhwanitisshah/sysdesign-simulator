@@ -5,6 +5,7 @@
 }
 
 .canvas-wrapper {
+  position: relative;
   flex: 1 1 auto;
   height: 100%;
 }
@@ -123,3 +124,34 @@
 .infra-node--service { border-top: 4px solid #10b981; }
 .infra-node--cache { border-top: 4px solid #eab308; }
 .infra-node--database { border-top: 4px solid #ef4444; }
+
+.infra-node__stats {
+  margin-top: 6px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text);
+}
+
+.infra-node__saturated {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* Simulation error banner */
+
+.sim-error-banner {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  max-width: 80%;
+}
