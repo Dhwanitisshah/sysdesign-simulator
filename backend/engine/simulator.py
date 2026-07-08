@@ -39,6 +39,7 @@ class NodeParams(BaseModel):
 class GraphNode(BaseModel):
     id: str
     type: NodeType
+    label: str | None = None
     params: NodeParams = Field(default_factory=NodeParams)
 
 

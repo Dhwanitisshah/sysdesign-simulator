@@ -16,6 +16,7 @@ import ParamsPanel from './components/ParamsPanel'
 import InfraNode from './components/InfraNode'
 import SystemResultsPanel from './components/SystemResultsPanel'
 import LatencyChart from './components/LatencyChart'
+import CritiquePanel from './components/CritiquePanel'
 import { NODE_TYPES } from './nodeTypes'
 import { simulateGraph } from './api'
 import { SimulationResultsContext } from './SimulationContext'
@@ -168,6 +169,7 @@ function AppInner() {
       <Palette onAddNode={onAddNodeFromPalette} />
 
       <div className="canvas-wrapper" ref={wrapperRef}>
+        <CritiquePanel nodes={nodes} edges={edges} />
         <SystemResultsPanel system={simResults.system} nodes={nodes} />
         {simError && <div className="sim-error-banner">{simError}</div>}
         <SimulationResultsContext.Provider value={simResults}>
