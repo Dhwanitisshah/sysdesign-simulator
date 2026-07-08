@@ -31,3 +31,26 @@ export async function simulateGraph(nodes, edges) {
 
   return { data: await response.json() }
 }
+
+// Calls POST /sweep. Returns { data } on success or { error } on failure.
+export async function sweepGraph(nodes, edges) {
+  let response
+  try {
+    response = await fetch(`${API_BASE}/sweep`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ graph: toGraph(nodes, edges) }),
+    })
+  } catch {
+    return { error: 'Could not reach the simulation server.' }
+  }
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => null)
+    const detail = body?.detail
+    const message = typeof detail === 'string' ? detail : detail ? JSON.stringify(detail) : `Sweep failed (${response.status})`
+    return { error: message }
+  }
+
+  return { data: await response.json() }
+}

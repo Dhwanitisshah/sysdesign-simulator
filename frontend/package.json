@@ -12,7 +12,8 @@
   "dependencies": {
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "reactflow": "^11.11.4"
+    "reactflow": "^11.11.4",
+    "recharts": "^3.9.2"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",

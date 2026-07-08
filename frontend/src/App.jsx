@@ -15,6 +15,7 @@ import Palette from './components/Palette'
 import ParamsPanel from './components/ParamsPanel'
 import InfraNode from './components/InfraNode'
 import SystemResultsPanel from './components/SystemResultsPanel'
+import LatencyChart from './components/LatencyChart'
 import { NODE_TYPES } from './nodeTypes'
 import { simulateGraph } from './api'
 import { SimulationResultsContext } from './SimulationContext'
@@ -190,6 +191,7 @@ function AppInner() {
             <Controls />
           </ReactFlow>
         </SimulationResultsContext.Provider>
+        <LatencyChart nodes={nodes} edges={edges} />
       </div>
 
       <ParamsPanel node={selectedNode} onLabelChange={onLabelChange} onParamChange={onParamChange} />
