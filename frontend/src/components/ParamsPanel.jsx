@@ -1,6 +1,6 @@
 import { NODE_TYPES } from '../nodeTypes'
 
-function ParamsPanel({ node, onLabelChange, onParamChange }) {
+function ParamsPanel({ node, onLabelChange, onParamChange, onDeleteNode }) {
   if (!node) {
     return (
       <aside className="params-panel">
@@ -13,7 +13,16 @@ function ParamsPanel({ node, onLabelChange, onParamChange }) {
 
   return (
     <aside className="params-panel">
-      <h2 className="params-panel__title">{def.label}</h2>
+      <div className="params-panel__header">
+        <h2 className="params-panel__title">{def.label}</h2>
+        <button
+          type="button"
+          className="params-panel__delete"
+          onClick={() => onDeleteNode(node.id)}
+        >
+          Delete node
+        </button>
+      </div>
 
       <label className="params-panel__field">
         <span>Label</span>

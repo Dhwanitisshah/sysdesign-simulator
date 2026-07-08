@@ -1,6 +1,7 @@
 import { Handle, Position } from 'reactflow'
 import { NODE_TYPES } from '../nodeTypes'
 import { useSimulationResult } from '../SimulationContext'
+import { useNodeActions } from '../NodeActionsContext'
 
 const WARNING_RHO = 0.8
 
@@ -13,6 +14,7 @@ function loadStateClass(rho, saturated) {
 function InfraNode({ id, data, selected }) {
   const def = NODE_TYPES[data.nodeType]
   const result = useSimulationResult(id)
+  const { onDeleteNode } = useNodeActions()
 
   const classes = [
     'infra-node',
@@ -27,6 +29,17 @@ function InfraNode({ id, data, selected }) {
   return (
     <div className={classes}>
       <Handle type="target" position={Position.Left} />
+      <button
+        type="button"
+        className="infra-node__delete"
+        onClick={(event) => {
+          event.stopPropagation()
+          onDeleteNode(id)
+        }}
+        aria-label="Delete node"
+      >
+        ×
+      </button>
       {result?.isBottleneck && <div className="infra-node__bottleneck-badge">bottleneck</div>}
       <div className="infra-node__type">{def.label}</div>
       <div className="infra-node__label">{data.label}</div>

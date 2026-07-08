@@ -21,6 +21,7 @@ import SaveLoadPanel from './components/SaveLoadPanel'
 import { NODE_TYPES } from './nodeTypes'
 import { fromGraph, simulateGraph } from './api'
 import { SimulationResultsContext } from './SimulationContext'
+import { NodeActionsContext } from './NodeActionsContext'
 
 const SIMULATE_DEBOUNCE_MS = 400
 
@@ -163,6 +164,12 @@ function AppInner() {
     )
   }, [])
 
+  const onDeleteNode = useCallback((nodeId) => {
+    setNodes((nds) => nds.filter((node) => node.id !== nodeId))
+    setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId))
+    setSelectedNodeId((current) => (current === nodeId ? null : current))
+  }, [])
+
   const onLoadDesign = useCallback((graph) => {
     const { nodes: loadedNodes, edges: loadedEdges } = fromGraph(graph)
     setNodes(loadedNodes)
@@ -184,30 +191,37 @@ function AppInner() {
         </div>
         {simError && <div className="sim-error-banner">{simError}</div>}
         <SimulationResultsContext.Provider value={simResults}>
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            nodeTypes={nodeTypes}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodesDelete={onNodesDelete}
-            onNodeClick={onNodeClick}
-            onPaneClick={onPaneClick}
-            onInit={setReactFlowInstance}
-            onDragOver={onDragOver}
-            onDrop={onDrop}
-            deleteKeyCode={['Backspace', 'Delete']}
-            fitView
-          >
-            <Background />
-            <Controls />
-          </ReactFlow>
+          <NodeActionsContext.Provider value={{ onDeleteNode }}>
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              nodeTypes={nodeTypes}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onNodesDelete={onNodesDelete}
+              onNodeClick={onNodeClick}
+              onPaneClick={onPaneClick}
+              onInit={setReactFlowInstance}
+              onDragOver={onDragOver}
+              onDrop={onDrop}
+              deleteKeyCode={['Backspace', 'Delete']}
+              fitView
+            >
+              <Background />
+              <Controls />
+            </ReactFlow>
+          </NodeActionsContext.Provider>
         </SimulationResultsContext.Provider>
         <LatencyChart nodes={nodes} edges={edges} />
       </div>
 
-      <ParamsPanel node={selectedNode} onLabelChange={onLabelChange} onParamChange={onParamChange} />
+      <ParamsPanel
+        node={selectedNode}
+        onLabelChange={onLabelChange}
+        onParamChange={onParamChange}
+        onDeleteNode={onDeleteNode}
+      />
     </div>
   )
 }
