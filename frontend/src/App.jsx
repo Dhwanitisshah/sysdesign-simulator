@@ -14,6 +14,7 @@ import './App.css'
 import Palette from './components/Palette'
 import ParamsPanel from './components/ParamsPanel'
 import InfraNode from './components/InfraNode'
+import SystemResultsPanel from './components/SystemResultsPanel'
 import { NODE_TYPES } from './nodeTypes'
 import { simulateGraph } from './api'
 import { SimulationResultsContext } from './SimulationContext'
@@ -44,13 +45,13 @@ function AppInner() {
   const [edges, setEdges] = useState([])
   const [selectedNodeId, setSelectedNodeId] = useState(null)
   const [reactFlowInstance, setReactFlowInstance] = useState(null)
-  const [simResults, setSimResults] = useState({})
+  const [simResults, setSimResults] = useState({ nodes: {}, system: null })
   const [simError, setSimError] = useState(null)
   const wrapperRef = useRef(null)
 
   useEffect(() => {
     if (nodes.length === 0) {
-      setSimResults({})
+      setSimResults({ nodes: {}, system: null })
       setSimError(null)
       return
     }
@@ -61,10 +62,10 @@ function AppInner() {
       if (cancelled) return
       if (error) {
         setSimError(error)
-        setSimResults({})
+        setSimResults({ nodes: {}, system: null })
       } else {
         setSimError(null)
-        setSimResults(data.nodes)
+        setSimResults({ nodes: data.nodes, system: data })
       }
     }, SIMULATE_DEBOUNCE_MS)
 
@@ -166,6 +167,7 @@ function AppInner() {
       <Palette onAddNode={onAddNodeFromPalette} />
 
       <div className="canvas-wrapper" ref={wrapperRef}>
+        <SystemResultsPanel system={simResults.system} nodes={nodes} />
         {simError && <div className="sim-error-banner">{simError}</div>}
         <SimulationResultsContext.Provider value={simResults}>
           <ReactFlow
