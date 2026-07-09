@@ -8,8 +8,8 @@ latency, throughput, availability, and cost of that architecture.
 
 - **Backend**: FastAPI (Python 3.12). Lives in `backend/`.
 - **Frontend**: React + Vite + React Flow for the canvas. Lives in `frontend/`.
-- **Database**: MongoDB (added later, for saving designs).
-- **LLM**: Groq (added later, for critiquing the architecture).
+- **Database**: MongoDB, for saving/loading designs (`backend/db.py`, `/designs` routes).
+- **LLM**: Groq, for critiquing the architecture (`backend/critique.py`, `/critique` route).
 
 ## Hard rule: all math lives in the backend engine
 
@@ -28,10 +28,22 @@ TypeScript/JavaScript, stop — that logic belongs in
 
 ## Phases
 
-Build incrementally. Do not jump ahead to later phases without an explicit
-request:
+Built incrementally, one phase at a time. Completed so far:
 
-- **Phase 0** (current): minimal skeleton — FastAPI `/health` endpoint,
-  React+Vite+React Flow frontend showing one draggable box, run instructions.
-- Later phases: full node/edge graph, simulation engine, results panel,
-  MongoDB persistence, Groq-based critique. Not yet defined in detail.
+- **Phase 0**: minimal skeleton — FastAPI `/health` endpoint, React+Vite+React
+  Flow frontend showing one draggable box.
+- **Phase 1**: draggable canvas with node palette and params panel.
+- **Phase 2**: simulation engine (`backend/engine/simulator.py`) validated
+  end to end with pytest.
+- **Phase 3**: saturation highlighting, system results panel, load-sweep
+  chart.
+- **Phase 4**: save/load architectures via MongoDB (`backend/db.py`,
+  `/designs` routes, `SaveLoadPanel.jsx`).
+- **Phase 5**: LLM architecture critique via Groq (`backend/critique.py`,
+  `/critique` route, `CritiquePanel.jsx`).
+
+Preset architectures (`frontend/src/presets.js`, `PresetsPanel.jsx`) have
+also been added.
+
+When adding new functionality, keep changes scoped to what's asked — don't
+jump ahead to unrequested future work.

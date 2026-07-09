@@ -94,9 +94,9 @@ pytest engine/ -v
 
 ## Roadmap
 
-- [ ] Save / load architectures (MongoDB persistence)
-- [ ] LLM-generated architecture critique — diagnose the bottleneck and recommend fixes
-- [ ] Preset architectures (monolith, cached web app, microservices)
+- [x] Save / load architectures (MongoDB persistence)
+- [x] LLM-generated architecture critique — diagnose the bottleneck and recommend fixes
+- [x] Preset architectures (monolith, cached web app, microservices)
 - [ ] Async / message-queue node type
 
 ## API
@@ -106,6 +106,11 @@ pytest engine/ -v
 | `/health` | GET | Health check |
 | `/simulate` | POST | Run the engine on a graph, return per-node and system metrics |
 | `/sweep` | POST | Re-run the engine across a range of arrival rates for the load-sweep chart |
+| `/critique` | POST | Groq-generated critique of the architecture's bottleneck and fixes |
+| `/designs` | POST | Save an architecture |
+| `/designs` | GET | List saved architectures |
+| `/designs/{design_id}` | GET | Load a saved architecture |
+| `/designs/{design_id}` | DELETE | Delete a saved architecture |
 
 ---
 
