@@ -17,3 +17,4 @@ frontend/dist/
 *.log
 .claude/
 /requirements.txt
+/CLAUDE.md
